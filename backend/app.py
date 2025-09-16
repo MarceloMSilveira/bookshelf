@@ -28,7 +28,7 @@ with app.app_context():
     db.create_all()
 
 CORS(app,
-     origins=[],
+     origins=["localhost:3000","http://127.0.0.1:3000/"],
      methods=['GET','POST'],
      supports_credentials=True)
 
