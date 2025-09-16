@@ -1,6 +1,6 @@
 import os
 from flask import Flask, request, abort
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import random
 from models import Book
 from config_db import db
@@ -27,19 +27,17 @@ from models import Book
 with app.app_context():
     db.create_all()
 
+CORS(app,
+     origins=[],
+     methods=['GET','POST'],
+     supports_credentials=True)
 
-CORS(app)
+#CASO NECESSÁRIO EM ALGUMA ROTA EM ESPECIAL USAR
+#@cross_origin()
 
-# CORS Headers
-@app.after_request
-def after_request(response):
-    response.headers.add(
-        "Access-Control-Allow-Headers", "Content-Type,Authorization,true"
-    )
-    response.headers.add(
-        "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS"
-    )
-    return response
+@app.route('/')
+def home():
+    return 'Ok!'
 
 # @TODO: Write a route that retrivies all books, paginated.
 #         You can use the constant above to paginate by eight books.
