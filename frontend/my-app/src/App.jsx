@@ -5,6 +5,7 @@ import FormView from './components/FormView';
 import Book from './components/Book';
 
 const PAGE_SIZE = 5;
+const url_bookshelf_server = 'http://localhost:5000';
 
 export default function App() {
   const [page, setPage] = useState(1);
@@ -15,7 +16,7 @@ export default function App() {
   const getBooks = useCallback(async (targetPage = 1) => {
     try {
       setLoading(true);
-      const res = await fetch(`/books?page=${targetPage}`, { credentials: 'same-origin' });
+      const res = await fetch(`${url_bookshelf_server}/books?page=${targetPage}`, { credentials: 'same-origin' });
       if (!res.ok) throw new Error('Request failed');
       const data = await res.json();
 
@@ -37,7 +38,7 @@ export default function App() {
   const deleteBook = async (id) => {
     if (!window.confirm('Are you sure you want to delete the book?')) return;
     try {
-      const res = await fetch(`/books/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+      const res = await fetch(`${url_bookshelf_server}/books/${id}`, { method: 'DELETE', credentials: 'same-origin' });
       if (!res.ok) throw new Error('Delete failed');
       await getBooks(page);
     } catch (err) {
@@ -48,7 +49,7 @@ export default function App() {
 
   const changeRating = async (id, rating) => {
     try {
-      const res = await fetch(`/books/${id}`, {
+      const res = await fetch(`${url_bookshelf_server}/books/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
@@ -67,7 +68,7 @@ export default function App() {
   const searchBooks = async (search) => {
     try {
       setLoading(true);
-      const res = await fetch('/books', {
+      const res = await fetch('${url_bookshelf_server}/books', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',

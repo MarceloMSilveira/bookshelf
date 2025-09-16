@@ -6,7 +6,7 @@ from models import Book
 from config_db import db
 from flask_migrate import Migrate
 
-BOOKS_PER_SHELF = 8
+BOOKS_PER_SHELF = 5
 
 # @TODO: General Instructions
 #   - As you're creating endpoints, define them and then search for 'TODO' within the frontend to update the endpoints there.
@@ -28,7 +28,7 @@ with app.app_context():
     db.create_all()
 
 CORS(app,
-     origins=["localhost:3000","http://127.0.0.1:3000/"],
+     origins=["http://localhost:5173","http://127.0.0.1:5173/"],
      methods=['GET','POST'],
      supports_credentials=True)
 
@@ -45,6 +45,36 @@ def home():
 #         update the frontend to handle additional books in the styling and pagination
 #         Response body keys: 'success', 'books' and 'total_books'
 # TEST: When completed, the webpage will display books including title, author, and rating shown as stars
+
+@app.route('/books')
+def all_books():
+    page = request.args.get("page",1,type=int)
+    stmt = db.select(Book)
+    try:
+        books = db.session.execute(stmt).scalars().all()
+        start = (page-1)*BOOKS_PER_SHELF
+        end = page*BOOKS_PER_SHELF
+        formatted_books = [book.format() for book in books]
+        if (len(formatted_books[start:end])==0):
+            abort(404)
+        return {
+            "success":True,
+            "books": formatted_books[start:end],
+            "total_books": len(formatted_books)
+        }
+    
+    except Exception as e:
+        print(str(e))
+        abort(404)
+
+@app.errorhandler(404)
+def not_found(error):
+    return {
+        "success":False,
+        "error": 404,
+        "message":"REsource not found"
+    }, 404
+    
 
 # @TODO: Write a route that will update a single book's rating.
 #         It should only be able to update the rating, not the entire representation
