@@ -5,6 +5,8 @@ import random
 from models import Book
 from config_db import db
 from flask_migrate import Migrate
+from werkzeug.exceptions import HTTPException
+
 
 BOOKS_PER_SHELF = 5
 
@@ -131,15 +133,15 @@ def create_app(config_object='config'):
     #       Your new book should show up immediately after you submit it at the end of the page.
     @app.route('/books', methods=['POST'])
     def add_book():
+        data = request.get_json()
+        if (not(data.get('title')) or not(data.get('author')) or not(data.get('rating'))):
+                abort(422, description = 'Parece que está faltando uma informação sobre o Livro')
         try:
-            data = request.get_json()
             new_book = Book (
                 title=data.get('title',None),
                 author=data.get('author',None),
                 rating=data.get('rating',None)
             )
-            if (not(new_book.title) or not(new_book.author) or not(new_book.rating)):
-                abort(422, description = 'Parece que está faltando uma informação sobre o Livro')
             
             new_book.insert()
             results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
@@ -151,8 +153,11 @@ def create_app(config_object='config'):
                 'books':books,
                 'total_books':len(books)
             }
-        except:
-            abort(422, description = 'Não foi possível processar a solicitação de inclusão desse livro no servidor.')
+        except HTTPException as e:
+            raise e
+        except Exception:
+            db.session.rollback()
+            abort(422, description='Não foi possível processar a solicitação de inclusão desse livro no servidor.')
 
     @app.errorhandler(404)
     def not_found(error):
