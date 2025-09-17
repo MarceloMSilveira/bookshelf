@@ -39,6 +39,7 @@ CORS(app,
 def home():
     return 'Ok!'
 
+# done!
 # @TODO: Write a route that retrivies all books, paginated.
 #         You can use the constant above to paginate by eight books.
 #         If you decide to change the number of books per page,
@@ -49,7 +50,7 @@ def home():
 @app.route('/books')
 def all_books():
     page = request.args.get("page",1,type=int)
-    stmt = db.select(Book)
+    stmt = db.select(Book).order_by(Book.id)
     try:
         books = db.session.execute(stmt).scalars().all()
         start = (page-1)*BOOKS_PER_SHELF
@@ -66,21 +67,29 @@ def all_books():
     except Exception as e:
         print(str(e))
         abort(404)
-
-@app.errorhandler(404)
-def not_found(error):
-    return {
-        "success":False,
-        "error": 404,
-        "message":"REsource not found"
-    }, 404
     
-
+#done!
 # @TODO: Write a route that will update a single book's rating.
 #         It should only be able to update the rating, not the entire representation
 #         and should follow API design principles regarding method and route.
 #         Response body keys: 'success'
 # TEST: When completed, you will be able to click on stars to update a book's rating and it will persist after refresh
+
+@app.route('/books/<int:book_id>',methods=['PATCH'])
+@cross_origin()
+def update_rating(book_id):
+    data = request.get_json()
+    try:
+        book = db.get_or_404(Book,book_id)
+        book.rating = data['rating']
+        book.update()
+        return {
+            "success":True
+        }
+    except:
+        db.session.rollback()
+        abort(404)
+
 
 # @TODO: Write a route that will delete a single book.
 #        Response body keys: 'success', 'deleted'(id of deleted book), 'books' and 'total_books'
@@ -93,3 +102,10 @@ def not_found(error):
 # TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books.
 #       Your new book should show up immediately after you submit it at the end of the page.
 
+@app.errorhandler(404)
+def not_found(error):
+    return {
+        "success":False,
+        "error": 404,
+        "message":"REsource not found"
+    }, 404
