@@ -16,6 +16,7 @@ BOOKS_PER_SHELF = 5
 
 
 # create and configure the app
+
 app = Flask(__name__)
 app.config.from_object('config')
 db.init_app(app)
@@ -164,3 +165,13 @@ def unprocessable(error):
         "error": 'Unprocessable Entity',
         "message":getattr(error, 'description','')
     }, 422
+
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return {
+        "status": 405,
+        "success":False,
+        "error": 'Method not allowed',
+        "message":getattr(error, 'description','')
+    }, 405
