@@ -103,8 +103,6 @@ def update_rating(book_id):
 def delete_book(book_id):
     try:
         book = db.session.get(Book,book_id)
-        print(book_id)
-        print(book.title)
         book.delete()
         results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
         books = [{'id':r.id, 'title':r.title, 'rating':r.rating, 'author':r.author} for r in results]
@@ -117,12 +115,7 @@ def delete_book(book_id):
             'total_books': len(books)
         }
     except:
-        books = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
-        return {
-            'success':False,
-            'books': books,
-            'total_books': len(books)
-        }
+        abort(404)
 
 
 
@@ -139,6 +132,9 @@ def add_book():
             author=data.get('author',None),
             rating=data.get('rating',None)
         )
+        if (not(new_book.title) or not(new_book.author) or not(new_book.rating)):
+            abort(422, description = 'Parece que está faltando uma informação sobre o Livro')
+        
         new_book.insert()
         results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
         books = [{'id':r.id, 'title':r.title, 'rating':r.rating, 'author':r.author} for r in results]
@@ -150,17 +146,21 @@ def add_book():
             'total_books':len(books)
         }
     except:
-        rows = db.session.execute(db.select(Book)).scalars().all()
-        books = [{'title':r.title} for r in rows]
-        return {
-            'success':False,
-            'total_books':len(books)
-        }, 404
+        abort(422, description = 'Não foi possível processar a solicitação de inclusão desse livro no servidor.')
 
 @app.errorhandler(404)
 def not_found(error):
     return {
         "success":False,
         "error": 404,
-        "message":"REsource not found"
+        "message":"Resource not found"
     }, 404
+
+@app.errorhandler(422)
+def unprocessable(error):
+    return {
+        "status": 422,
+        "success":False,
+        "error": 'Unprocessable Entity',
+        "message":getattr(error, 'description','')
+    }, 422
