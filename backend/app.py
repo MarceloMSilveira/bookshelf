@@ -85,7 +85,8 @@ def update_rating(book_id):
         book.rating = data['rating']
         book.update()
         return {
-            "success":True
+            "success":True,
+            "updated":book.id
         }
     except:
         db.session.rollback()
@@ -134,9 +135,9 @@ def add_book():
     try:
         data = request.get_json()
         new_book = Book (
-            title=data['title'],
-            author=data['author'],
-            rating=data['rating']
+            title=data.get('title',None),
+            author=data.get('author',None),
+            rating=data.get('rating',None)
         )
         new_book.insert()
         results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
