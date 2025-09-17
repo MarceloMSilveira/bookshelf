@@ -76,7 +76,6 @@ def all_books():
 #         and should follow API design principles regarding method and route.
 #         Response body keys: 'success'
 # TEST: When completed, you will be able to click on stars to update a book's rating and it will persist after refresh
-
 @app.route('/books/<int:book_id>',methods=['PATCH'])
 @cross_origin()
 def update_rating(book_id):
@@ -92,17 +91,45 @@ def update_rating(book_id):
         db.session.rollback()
         abort(404)
 
-
+#done
 # @TODO: Write a route that will delete a single book.
 #        Response body keys: 'success', 'deleted'(id of deleted book), 'books' and 'total_books'
 #        Response body keys: 'success', 'books' and 'total_books'
 
 # TEST: When completed, you will be able to delete a single book by clicking on the trashcan.
+@app.route('/books/<int:book_id>', methods=['DELETE'])
+@cross_origin()
+def delete_book(book_id):
+    try:
+        book = db.session.get(Book,book_id)
+        print(book_id)
+        print(book.title)
+        book.delete()
+        results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
+        books = [{'id':r.id, 'title':r.title, 'rating':r.rating, 'author':r.author} for r in results]
+        
+
+        return {
+            'success':True,
+            'deleted':book_id,
+            'books': books,
+            'total_books': len(books)
+        }
+    except:
+        books = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
+        return {
+            'success':False,
+            'books': books,
+            'total_books': len(books)
+        }
+
+
 
 # @TODO: Write a route that create a new book.
 #        Response body keys: 'success', 'created'(id of created book), 'books' and 'total_books'
 # TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books.
 #       Your new book should show up immediately after you submit it at the end of the page.
+
 
 @app.errorhandler(404)
 def not_found(error):

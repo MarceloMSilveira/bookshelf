@@ -36,6 +36,7 @@ const FormView = ({ searchBooks }) => {
       // O formulário é atualizado pelo React (controlled components).
 
     } catch (error) {
+      console.log(error)
       alert('Não foi possível adicionar o livro. Por favor, tente novamente.');
     }
   };
