@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, abort
+from flask import Flask, request, abort, redirect, url_for
 from flask_cors import CORS, cross_origin
 import random
 from models import Book
@@ -29,6 +29,7 @@ with app.app_context():
 
 CORS(app,
      origins=["http://localhost:5173","http://127.0.0.1:5173/"],
+     #origins=['*'],
      methods=['GET','POST'],
      supports_credentials=True)
 
@@ -37,7 +38,8 @@ CORS(app,
 
 @app.route('/')
 def home():
-    return 'Ok!'
+    return redirect(url_for('all_books'))
+    #return 'test'
 
 # done!
 # @TODO: Write a route that retrivies all books, paginated.
