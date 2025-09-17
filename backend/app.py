@@ -107,6 +107,8 @@ def create_app(config_object='config'):
     def delete_book(book_id):
         try:
             book = db.session.get(Book,book_id)
+            if not book:
+                abort(404)
             book.delete()
             results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
             books = [{'id':r.id, 'title':r.title, 'rating':r.rating, 'author':r.author} for r in results]
