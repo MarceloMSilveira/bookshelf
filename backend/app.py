@@ -17,12 +17,14 @@ BOOKS_PER_SHELF = 5
 
 # create and configure the app
 
+migrate = Migrate()
+
 def create_app(config_object='config'):
     app = Flask(__name__)
     app.config.from_object(config_object)
     db.init_app(app)
 
-    migrate = Migrate(app,db)
+    migrate.init_app(app,db)
 
     from models import Book
 
