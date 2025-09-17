@@ -1,7 +1,5 @@
-import os
 from flask import Flask, request, abort, redirect, url_for
 from flask_cors import CORS, cross_origin
-import random
 from models import Book
 from config_db import db
 from flask_migrate import Migrate
@@ -27,8 +25,6 @@ def create_app(config_object='config'):
     db.init_app(app)
 
     migrate.init_app(app,db)
-
-    from models import Book
 
     with app.app_context():
         db.create_all()
