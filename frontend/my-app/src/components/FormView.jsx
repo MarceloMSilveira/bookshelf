@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import '../stylesheets/FormView.css';
 
+const url_bookshelf_server = 'http://localhost:5000';
+
 const FormView = ({ searchBooks }) => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -11,7 +13,7 @@ const FormView = ({ searchBooks }) => {
   const submitBook = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('/books', {
+      const response = await fetch(`${url_bookshelf_server}/books`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

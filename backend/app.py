@@ -127,9 +127,34 @@ def delete_book(book_id):
 
 # @TODO: Write a route that create a new book.
 #        Response body keys: 'success', 'created'(id of created book), 'books' and 'total_books'
-# TEST: When completed, you will be able to a new book using the form. Try doing so from the last page of books.
+# TEST: When completed, you will be able to create a new book using the form. Try doing so from the last page of books.
 #       Your new book should show up immediately after you submit it at the end of the page.
-
+@app.route('/books', methods=['POST'])
+def add_book():
+    try:
+        data = request.get_json()
+        new_book = Book (
+            title=data['title'],
+            author=data['author'],
+            rating=data['rating']
+        )
+        new_book.insert()
+        results = db.session.execute(db.select(Book).order_by(Book.id)).scalars().all()
+        books = [{'id':r.id, 'title':r.title, 'rating':r.rating, 'author':r.author} for r in results]
+        print(new_book.id)
+        return {
+            'success':True,
+            'created':new_book.id,
+            'books':books,
+            'total_books':len(books)
+        }
+    except:
+        rows = db.session.execute(db.select(Book)).scalars().all()
+        books = [{'title':r.title} for r in rows]
+        return {
+            'success':False,
+            'total_books':len(books)
+        }, 404
 
 @app.errorhandler(404)
 def not_found(error):
