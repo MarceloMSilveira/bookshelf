@@ -81,7 +81,11 @@ def create_app(config_object='config'):
     @app.route('/books/<int:book_id>',methods=['PATCH'])
     @cross_origin()
     def update_rating(book_id):
-        data = request.get_json()
+        try:
+            data = request.get_json()
+        except:
+            abort(415,description='Verifique os dados enviados para atualizar o rating')
+
         if (data['rating']==''):
             abort(400,description='missing rating field in your request')
         try:
@@ -174,6 +178,15 @@ def create_app(config_object='config'):
             "error": 404,
             "message":"Resource not found"
         }, 404
+
+    @app.errorhandler(415)
+    def unsupported_type(error):
+        return{
+            "status": 415,
+            "success":False,
+            "error": 'unsupported type',
+            "message":getattr(error, 'description','')
+        }, 415
 
     @app.errorhandler(422)
     def unprocessable(error):

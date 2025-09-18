@@ -77,6 +77,7 @@ class BooksApiTestCase(unittest.TestCase):
         self.assertEqual(data['status'], 422)
         self.assertEqual(data['error'], 'Unprocessable Entity')
         self.assertIn('Livro', data['message'])
+        res = self.client.post('/books/45', data=json.dumps(payload), content_type='application/json')
 
     #testar post to endpoint errado post ('/books/45') por exemplo.
 

@@ -94,22 +94,39 @@ class BookApiTestCase(unittest.TestCase):
         self.assertEqual(res.status_code,422) 
         self.assertFalse(data['success'])
 
-# patch /books/id
+    #fails wrong endpoint
+    def test_post_books_wrong_endpoint(self):
+        payload = {'title': '', 'author': 'Brett Slatkin', 'rating': 5}
+        res = self.client.post('/books/45', data=json.dumps(payload), content_type='application/json')
+        data = res.get_json()
+        self.assertEqual(res.status_code,405) 
+        self.assertFalse(data['success'])
+
+
+# PATCH /books/id
     #success
     def test_patch_books_success_cases(self):
         # pega um id existente
         a_book = db.session.execute(db.select(Book).order_by(Book.id)).scalars().first()
+        print(f"ID EXISTENTE NO MEU BD: {a_book.id}")
+        self.assertEqual(a_book.rating,5)
         res = self.client.patch(f'/books/{a_book.id}', data=json.dumps({'rating': 3}),
                                 content_type='application/json')
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(a_book.rating,3)
         data = res.get_json()
         self.assertTrue(data['success'])
+        self.assertIn('updated',data)
 
-    #fail:
+    #fail1 id não existente:
     def test_update_rating_404_for_unknown_id(self):
         res = self.client.patch('/books/99999', data=json.dumps({'rating': 1}),
                                 content_type='application/json')
         self.assertEqual(res.status_code, 404)
+    #fail2 faltou o dado {'rating':x}
+    def test_update_missing_body_fail_case(self):
+        res = self.client.patch('/books/1', content_type='application/json')
+        self.assertEqual(res.status_code,415)
 
 
 # delete /books/id
@@ -124,10 +141,15 @@ class BookApiTestCase(unittest.TestCase):
         data = res.get_json()
         self.assertTrue(data['success'])
         self.assertEqual(data['deleted'], b.id)
+        rows = db.session.execute(db.select(Book)).scalars().all()
+        all_books_len = len([r.title for r in rows])
         b2 = db.session.execute(db.select(Book).where(Book.title=='Refactoring')).scalars().first()
         res = self.client.delete(f'/books/{b2.id}')
         data = res.get_json()
         self.assertIn('deleted',data)
+        rows = db.session.execute(db.select(Book)).scalars().all()
+        all_books_len_after_delete = len([r.title for r in rows])
+        self.assertEqual(all_books_len-1,all_books_len_after_delete)
     
     
     #fail
@@ -136,3 +158,6 @@ class BookApiTestCase(unittest.TestCase):
         data = res.get_json()
         self.assertEqual(res.status_code,404)
         self.assertFalse(data['success'])
+
+if __name__ == '__main__':
+    unittest.main()
