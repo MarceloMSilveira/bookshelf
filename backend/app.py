@@ -134,8 +134,26 @@ def create_app(config_object='config'):
     # TEST: When completed, you will be able to create a new book using the form. Try doing so from the last page of books.
     #       Your new book should show up immediately after you submit it at the end of the page.
     @app.route('/books', methods=['POST'])
-    def add_book():
-        data = request.get_json()
+    def add_or_search_book():
+        try:
+            data = request.get_json()
+        except:
+            abort(415,description='Verifique os dados enviados')
+        
+        if (data.get('search')):
+            if (data.get('search') == ''):
+                abort(422, description = 'Parece que está faltando uma informação sobre o Livro que você deseja encontrar (não faça busca vazia!)')
+            else:
+                search_term = data.get('search')
+                results = db.session.execute(db.select(Book).where(Book.title.ilike(f"%{search_term}%"))).scalars().all()
+                books = [b.title for b in results]
+                for b in books:
+                    print(b.title)
+                return {
+                    'success': True,
+                    'books': books,
+                    'total_books': len(books)
+                }
         if (not(data.get('title')) or not(data.get('author')) or not(data.get('rating'))):
                 abort(422, description = 'Parece que está faltando uma informação sobre o Livro')
         try:

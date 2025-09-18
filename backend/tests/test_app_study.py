@@ -103,14 +103,14 @@ class BookApiTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
 
     #search books by title
-    def test_post_search_books_success_found_cases(self):
+    def test_post_search_books_with_result(self):
         payload = {'search':'code'}
         res = self.client.post('/books',data=json.dumps(payload), content_type='application/json')
         data = res.get_json()
         books = data['books']
         self.assertEqual(len(books),2)
 
-    def test_post_search_books_success_not_found_cases(self):
+    def test_post_search_books__without_result(self):
         payload = {'search':'toby'}
         res = self.client.post('/books',data=json.dumps(payload), content_type='application/json')
         data = res.get_json()
