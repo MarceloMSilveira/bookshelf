@@ -82,6 +82,8 @@ def create_app(config_object='config'):
     @cross_origin()
     def update_rating(book_id):
         data = request.get_json()
+        if (data['rating']==''):
+            abort(400,description='missing rating field in your request')
         try:
             book = db.get_or_404(Book,book_id)
             book.rating = data['rating']
@@ -154,6 +156,16 @@ def create_app(config_object='config'):
         except Exception:
             db.session.rollback()
             abort(422, description='Não foi possível processar a solicitação de inclusão desse livro no servidor.')
+    
+    
+    @app.errorhandler(400)
+    def bad_request(error):
+        return{
+            "status": 400,
+            "success":False,
+            "error": 'bad request',
+            "message":getattr(error, 'description','')
+        }, 400
 
     @app.errorhandler(404)
     def not_found(error):
