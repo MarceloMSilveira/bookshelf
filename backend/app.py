@@ -196,6 +196,15 @@ def create_app(config_object='config'):
             "error": 404,
             "message":"Resource not found"
         }, 404
+    
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return {
+            "status": 405,
+            "success":False,
+            "error": 'Method not allowed',
+            "message":getattr(error, 'description','')
+        }, 405
 
     @app.errorhandler(415)
     def unsupported_type(error):
@@ -215,15 +224,6 @@ def create_app(config_object='config'):
             "message":getattr(error, 'description','')
         }, 422
 
-
-    @app.errorhandler(405)
-    def method_not_allowed(error):
-        return {
-            "status": 405,
-            "success":False,
-            "error": 'Method not allowed',
-            "message":getattr(error, 'description','')
-        }, 405
 
     return app
 
