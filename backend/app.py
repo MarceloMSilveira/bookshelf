@@ -30,10 +30,10 @@ def create_app(config_object='config'):
         db.create_all()
 
     CORS(app,
-        origins=["http://localhost:5173","http://127.0.0.1:5173/"],
-        #origins=['*'],
-        methods=['GET','POST'],
-        supports_credentials=True)
+        origins=["http://localhost:5174","http://127.0.0.1:5174"],
+        supports_credentials=True,
+        #allow_headers=['Content-Type','Authorization'] apenas se forem enviados esses headers no fetch.
+        )
 
     #CASO NECESSÁRIO EM ALGUMA ROTA EM ESPECIAL USAR
     #@cross_origin()
@@ -79,7 +79,6 @@ def create_app(config_object='config'):
     #         Response body keys: 'success'
     # TEST: When completed, you will be able to click on stars to update a book's rating and it will persist after refresh
     @app.route('/books/<int:book_id>',methods=['PATCH'])
-    @cross_origin()
     def update_rating(book_id):
         try:
             data = request.get_json()
@@ -107,7 +106,6 @@ def create_app(config_object='config'):
 
     # TEST: When completed, you will be able to delete a single book by clicking on the trashcan.
     @app.route('/books/<int:book_id>', methods=['DELETE'])
-    @cross_origin()
     def delete_book(book_id):
         try:
             book = db.session.get(Book,book_id)
