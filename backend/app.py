@@ -30,7 +30,7 @@ def create_app(config_object='config'):
         db.create_all()
 
     CORS(app,
-        origins=["http://localhost:5174","http://127.0.0.1:5174"],
+        origins=["http://localhost:5173","http://127.0.0.1:5173"],
         supports_credentials=True,
         #allow_headers=['Content-Type','Authorization'] apenas se forem enviados esses headers no fetch.
         )
